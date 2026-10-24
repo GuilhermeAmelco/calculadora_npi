@@ -1,0 +1,21 @@
+# Binários compilados
+*.exe
+*.exe.*
+
+# Objetos e artefatos de build
+*.o
+*.obj
+*.a
+*.lib
+*.pdb
+*.ilk
+
+# Diretórios de build
+build/
+bin/
+out/
+
+# Sistema
+Thumbs.db
+desktop.ini
+.DS_Store
