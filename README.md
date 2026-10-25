@@ -27,7 +27,7 @@ g++ main.cpp -o main.exe
 | `FilaDinamica.hpp`  | Fila encadeada com ponteiros para o começo e o fim.                                                                              |
 | `PilhaEstatica.hpp` | Pilha sobre vetor de tamanho fixo (`TAM`).                                                                                       |
 | `PilhaDinamica.hpp` | Pilha encadeada.                                                                                                                 |
-| `Lue.hpp`           | Lista unidirecional encadeada (LUE) usada para guardar as variáveis da expressão.                                                |
+| `Lue.hpp`           | Lista unidirecional encadeada (LUE) usada para guardar as variáveis da expressão. Cada nó tem `info`, `label` e `elo`.           |
 
 As estruturas são **header-only** e **template**, então a mesma implementação
 serve para `char`, `string` ou qualquer outro tipo. A escolha entre versão
@@ -43,8 +43,25 @@ lógica.
 ### `bool is_operador(char c)`
 
 Helper que responde se um caractere é um operador binário (`+`, `-`, `*`, `/`)
-ou um delimitador de grupo (`(`, `)`). É a base da tokenização: tudo que **não**
-é operador é tratado como parte de um nome de variável.
+ou um delimitador de grupo (`(`, `)`). É a base da tokenização: os operadores
+separam os tokens (números ou nomes de variável).
+
+### `bool is_digito(char c)`, `bool is_inicio_variavel(char c)`, `bool is_caractere_variavel(char c)`
+
+Helpers da regra léxica dos tokens:
+
+- `is_digito` reconhece `0`–`9`;
+- `is_inicio_variavel` reconhece letra ou `_` — **um nome de variável nunca
+  começa com dígito**, o que impede `12` de ser lido como a variável `12`;
+- `is_caractere_variavel` reconhece letra, dígito ou `_` (válidos apenas a partir
+  do segundo caractere do nome).
+
+Gramática aceita:
+
+```
+numero   := digito+ ('.' digito+)?
+variavel := (letra | '_') (letra | digito | '_')*
+```
 
 ### `int prioridade(char c)`
 
@@ -70,9 +87,16 @@ referência:
 Regras aplicadas no laço principal:
 
 1. **Operando**: os caracteres são acumulados em `variavel` até o próximo
-   caractere ser um operador (ou até a fila acabar). Ao fechar o token, ele é
-   enfileirado na saída (`fila_notacao_polonesa_invertida`) e inserido na lista
-   de variáveis com `inserirFinal`.
+   caractere ser um operador (ou até a fila acabar). O primeiro caractere define
+   o tipo do token: dígito → número (aceita um único `.` como separador
+   decimal), letra/`_` → nome de variável. Qualquer outro símbolo (`@`, `#`, ...)
+   faz a função retornar erro, assim como tokens malformados (`2a`, `12.`,
+   `1.2.3`). Ao fechar o token, ele é enfileirado na saída
+   (`fila_notacao_polonesa_invertida`); apenas **variáveis** são inseridas em
+   `lista_guarda_variaveis` com `inserirFinal(lista, string(), variavel)`: o
+   nome da variável vai no **`label`** do nó e o `info` fica vazio, reservado
+   para o valor da variável. Antes de inserir, `pesquisarLabel` verifica se o
+   nome já está na lista — variável repetida (`a+a`) não gera nó duplicado.
 2. **`(`**: é empilhado.
 3. **`)`**: desempilha e emite operadores até encontrar o `(` correspondente.
    Se o `(` não existir, retorna erro.
@@ -123,67 +147,3 @@ Convenções já aplicadas no repositório:
   (`fila_guarda_expressao`, `pilha_operadores`, `variavel`), com comentários
   explicando o "porquê" de decisões não óbvias (ex.: por que a pilha de
   operadores é criada na `main`).
-
-Inconsistências com o padrão (a corrigir):
-
-- `Vazia` e `Cheia` estão em `PascalCase` apesar de serem funções.
-- `inserirFinal`, `retirarPosicao` e `retirarValor` estão em `camelCase`, e não
-  em `snake_case` (`inserir_final`, `retirar_posicao`, `retirar_valor`).
-- `using namespace std;` em headers (`calculadora.hpp`, `Lue.hpp`) polui o
-  escopo de quem inclui o arquivo; o ideal é qualificar (`std::string`) ou
-  limitar o `using` ao `.cpp`.
-
-## O que falta implementar
-
-Itens já conhecidos:
-
-- [ ] **Evitar variáveis duplicadas na lista**: `converter_para_notacao_polonesa`
-      chama `inserirFinal` sem checar se o nome já existe, então `a+a` gera duas
-      entradas `a`. Falta usar `pesquisar` antes de inserir.
-- [ ] **A `Lue` não tem como recuperar o valor**: `pesquisar` só devolve `bool` e
-      não há função que devolva o elemento de uma posição (um `obterPosicao` /
-      `obterValor`). Sem isso não é possível montar um mapa
-      `nome -> valor` para as variáveis.
-- [ ] **Função que pergunta o valor das variáveis e atribui**: percorrer a
-      `Lue` de nomes, pedir cada valor ao usuário e guardar a associação. Hoje a
-      lista guarda apenas `string` (nomes), sem espaço para o valor — é preciso
-      trocar por algo como `struct Variavel { string nome; double valor; }`.
-- [ ] **Função que calcula a expressão em RPN**: consumir a
-      `fila_notacao_polonesa_invertida` com uma pilha de operandos (número ou
-      variável), aplicar os operadores e devolver o resultado.
-
-Outros pontos percebidos no código:
-
-- [ ] **Operandos numéricos**: qualquer sequência que não seja operador é
-      tratada como _nome de variável_. Não há suporte a constantes como `42`
-      nem distinção entre `12` e uma variável chamada `12`.
-- [ ] **Operador unário (`-a`) e operadores de mais de um caractere** não são
-      suportados — `is_operador` reconhece apenas 1 caractere.
-- [ ] **Tokenização com `top` na fila de entrada**: funciona porque a fila tem
-      `top`, mas exige que a estrutura escolhida sempre tenha essa operação; vale
-      documentar essa dependência ou mover a tokenização para uma etapa própria.
-- [ ] **Saída da RPN sem separador**: `main.cpp` imprime os tokens concatenados
-      (`ab+c*`), o que fica ambíguo para variáveis de nome longo (`ab` pode ser
-      um token ou dois). Imprimir com espaço entre os tokens.
-- [ ] **Validação de caracteres inválidos**: não há checagem de símbolos
-      estranhos (`@`, `#`, ...), nem de expressão vazia, nem de operandos
-      insuficientes (`+` sozinho).
-- [ ] **Divisão por zero** não é tratada (relevante quando existir a avaliação).
-- [ ] **Mensagens de erro genéricas**: `converter_para_notacao_polonesa` retorna
-      apenas `false`, sem indicar se o erro foi parêntese desbalanceado, falta de
-      memória ou expressão inválida. Um `enum` de erro resolveria.
-- [ ] **`liberar` não é chamado ao final da `main`**: as filas/pilhas/listas
-      dinâmicas vazam memória ao encerrar (na prática o SO recolhe, mas o padrão
-      do projeto é liberar).
-- [ ] **`TAM` como macro global**: `FilaEstatica.hpp` e `PilhaEstatica.hpp`
-      definem `TAM 50`; as duas usam o mesmo valor e não há como configurar
-      tamanhos diferentes por estrutura. Um parâmetro de template ou constante
-      por struct seria melhor.
-- [ ] **`Lue::inserir` (ordenação) descarta valores repetidos** silenciosamente e
-      retorna `true`; se for usado no futuro, precisa tratar empate.
-- [ ] **`copiar`, `pesquisar`, `mostrar` e `comprimento` recebem `Lue<T>` por
-      valor**, copiando a lista inteira a cada chamada; deveriam receber
-      `const Lue<T> &`.
-- [ ] **Build**: não há `Makefile`/script de compilação; hoje é preciso rodar o
-      `g++` manualmente.
-- [ ] **Testes**: não existe nenhum teste automatizado para a conversão.

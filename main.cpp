@@ -43,11 +43,21 @@ int main()
     return 1;
   }
 
-  string c;
-  while (dequeue(fila_notacao_polonesa_invertida, c))
+  // cada variavel da expressao precisa de um valor para o calculo
+  setar_variaveis(lista_guarda_variaveis);
+
+  PilhaDinamica<double> pilha_valores; // pilha que vai guardar os operandos já resolvidos
+  inicializar(pilha_valores);
+
+  // a fila é consumida no cálculo, então ela não é mais impressa depois
+  double resultado;
+  if (!calcular_expressao(fila_notacao_polonesa_invertida, pilha_valores, lista_guarda_variaveis, resultado))
   {
-    cout << c;
+    cout << "Ocorreu um erro ao tentar calcular a expressao" << endl;
+    return 1;
   }
+
+  cout << "Resultado: " << resultado << endl;
 
   return 0;
 }
