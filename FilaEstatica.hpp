@@ -1,5 +1,14 @@
+/*
+ * Trabalho de Estrutura de Dados - Calculadora em notacao polonesa invertida
+ * Integrantes: Guilherme Amelco e Caue
+ *
+ * Fila estatica circular: TAD usado como entrada da expressao.
+ */
+
 #ifndef FILA_ESTATICA_HPP
 #define FILA_ESTATICA_HPP
+
+#include <iostream>
 
 #ifndef TAM
 #define TAM 50
@@ -54,6 +63,19 @@ bool top(const FilaEstatica<T> &f, T &valor)
         return false;
     valor = f.vetor[f.comeco];
     return true;
+}
+
+// Percorre a fila do começo para o fim sem alterá-la, só mostrando os elementos.
+template <typename T>
+void mostrar(const FilaEstatica<T> &f)
+{
+    int pos = f.comeco;
+
+    for (int i = 0; i < f.qtd; i++)
+    {
+        std::cout << f.vetor[pos] << " ";
+        pos = (pos + 1) % TAM; // a fila é circular
+    }
 }
 
 template <typename T>

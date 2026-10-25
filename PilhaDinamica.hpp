@@ -1,6 +1,14 @@
+/*
+ * Trabalho de Estrutura de Dados - Calculadora em notacao polonesa invertida
+ * Integrantes: Guilherme Amelco e Caue
+ *
+ * Pilha dinamica encadeada: TAD usado para operadores e valores.
+ */
+
 #ifndef PILHA_DINAMICA_HPP
 #define PILHA_DINAMICA_HPP
 
+#include <iostream>
 #include <new>
 
 template <typename T>
@@ -70,6 +78,17 @@ bool top(const PilhaDinamica<T> &p, T &valor){
     if( Vazia(p) ) return false;
     valor = p.topo->info;
     return true;
+}
+
+// Percorre a pilha do topo para a base sem alterá-la, só mostrando os elementos.
+template <typename T>
+void mostrar(const PilhaDinamica<T> &p){
+    NoPilha<T> *aux = p.topo;
+
+    while( aux != nullptr ){
+        std::cout << aux->info << " ";
+        aux = aux->eloA;
+    }
 }
 
 template <typename T>

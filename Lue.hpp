@@ -1,3 +1,11 @@
+/*
+ * Trabalho de Estrutura de Dados - Calculadora em notacao polonesa invertida
+ * Integrantes: Guilherme Amelco e Caue
+ *
+ * Lue: lista unidirecional generica usada para guardar as variaveis da
+ * expressao (nome no label e valor no info).
+ */
+
 #ifndef LUE_HPP
 #define LUE_HPP
 

@@ -1,5 +1,27 @@
+/*
+ * Trabalho de Estrutura de Dados - Calculadora em notacao polonesa invertida
+ * Integrantes: Guilherme Amelco e Caue
+ *
+ * O programa le uma expressao numerica, converte para a notacao polonesa
+ * invertida (RPN) usando pilha e fila, pede o valor das variaveis e apresenta
+ * o resultado final.
+ *
+ * Estruturas usadas:
+ *   Fila  -> entrada da expressao (ordem de leitura) e saida em RPN
+ *   Pilha -> operadores durante a conversao e valores durante o calculo
+ *   Lista -> variaveis da expressao e seus valores
+ *
+ * Compilacao: g++ -std=c++17 -Wall -Wextra -o main.exe main.cpp
+ */
+
 #include <iostream>
 #include <string>
+
+// Capacidade das versões estáticas (pilha e fila). Precisa ser definida antes
+// dos headers porque as estruturas estáticas usam TAM como tamanho do vetor.
+#ifndef TAM
+#define TAM 200
+#endif // TAM
 
 #include "calculadora.hpp"
 #include "FilaDinamica.hpp"
@@ -10,54 +32,79 @@
 
 using namespace std;
 
-int main()
+// Troque para 1 para rodar com as estruturas ESTÁTICAS (pilha em vetor e fila
+// circular em vetor) ou deixe 0 para as DINÂMICAS (encadeadas). Também é
+// possível escolher na compilação: g++ -DESTRUTURA_ESTATICA=1 ...
+// A aplicação se comporta da mesma forma nas duas versões: toda a lógica chama
+// as operações (inicializar, queue/push, dequeue/pop, top, Vazia, Cheia,
+// liberar) por funções livres, então só o tipo das variáveis abaixo muda.
+#ifndef ESTRUTURA_ESTATICA
+#define ESTRUTURA_ESTATICA 0
+#endif
+
+// Resolve uma expressão: cria, inicializa, usa e libera as estruturas.
+// As variáveis precisam ficar na main (e não dentro de converter_para_notacao_polonesa)
+// justamente para permitir trocar a estrutura sem tocar na lógica.
+// Retorna false quando a entrada de dados termina (EOF).
+bool calcular_resultado()
 {
-  string expressao;
+#if ESTRUTURA_ESTATICA
+  FilaEstatica<char> fila_guarda_expressao;             // entrada: expressão caractere por caractere
+  FilaEstatica<string> fila_notacao_polonesa_invertida; // saída: tokens em RPN
+  PilhaEstatica<char> pilha_operadores;                 // operadores e abre-delimitadores
+  PilhaEstatica<double> pilha_valores;                  // operandos já resolvidos
+  Lue<string> lista_guarda_variaveis;                   // nome e valor de cada variável
+#else
+  FilaDinamica<char> fila_guarda_expressao;             // entrada: expressão caractere por caractere
+  FilaDinamica<string> fila_notacao_polonesa_invertida; // saída: tokens em RPN
+  PilhaDinamica<char> pilha_operadores;                 // operadores e abre-delimitadores
+  PilhaDinamica<double> pilha_valores;                  // operandos já resolvidos
+  Lue<string> lista_guarda_variaveis;                   // nome e valor de cada variável
+#endif
 
-  cout << "Digite a expressao:" << endl;
-  getline(cin, expressao);
-
-  FilaDinamica<char> fila_guarda_expressao;
   inicializar(fila_guarda_expressao);
-
-  if (!inserir_expressao_na_fila(fila_guarda_expressao, expressao)) // Insere, se retornar erro, ocorreu um erro ao tentar inserir
-  {
-    cout << "Erro: nao foi possivel inserir a expressao na fila." << endl;
-    return 1;
-  }
-
-  // após ter pego a expressão com sucesso, podemos começar a converter para a notação polonesa invertida ###
-  // um ponto a ser levantando, essa variavel pilha_operadores. Pode ser criada na função converter_para_notacao_polonesa, porém, queremos poder escolher se é dinamica ou estática, então irá ficar na main para facilitar isso
-  FilaDinamica<string> fila_notacao_polonesa_invertida; // fila que vai guardar na ordem da notação polonesa (variáveis podem ter letras e números)
   inicializar(fila_notacao_polonesa_invertida);
-
-  PilhaDinamica<char> pilha_operadores; // pilha que vai guardar os operadores (ex: +, -, *)
   inicializar(pilha_operadores);
-
-  Lue<string> lista_guarda_variaveis; // vai guardas as variaveis
+  inicializar(pilha_valores);
   inicializar(lista_guarda_variaveis);
 
-  if (!converter_para_notacao_polonesa(fila_guarda_expressao, fila_notacao_polonesa_invertida, pilha_operadores, lista_guarda_variaveis))
+  bool continuar = executar_calculadora(fila_guarda_expressao, fila_notacao_polonesa_invertida,
+                                        pilha_operadores, pilha_valores, lista_guarda_variaveis);
+
+  // libera a memória ocupada por todas as estruturas (nas estáticas só reinicializa)
+  liberar(fila_guarda_expressao);
+  liberar(fila_notacao_polonesa_invertida);
+  liberar(pilha_operadores);
+  liberar(pilha_valores);
+  liberar(lista_guarda_variaveis);
+
+  return continuar;
+}
+
+int main()
+{
+#if ESTRUTURA_ESTATICA
+  cout << "Estruturas em uso: ESTATICAS" << endl;
+#else
+  cout << "Estruturas em uso: DINAMICAS" << endl;
+#endif
+  cout << endl;
+
+  while (calcular_resultado())
   {
-    cout << "Ocorreu um erro ao tentar converter" << endl;
-    return 1;
+    string resposta;
+
+    cout << endl
+         << "Deseja calcular outra expressao? (s/N): ";
+
+    if (!getline(cin, resposta))
+      break; // entrada encerrada
+    if (resposta != "s" && resposta != "S")
+      break;
+
+    cout << endl;
   }
 
-  // cada variavel da expressao precisa de um valor para o calculo
-  setar_variaveis(lista_guarda_variaveis);
-
-  PilhaDinamica<double> pilha_valores; // pilha que vai guardar os operandos já resolvidos
-  inicializar(pilha_valores);
-
-  // a fila é consumida no cálculo, então ela não é mais impressa depois
-  double resultado;
-  if (!calcular_expressao(fila_notacao_polonesa_invertida, pilha_valores, lista_guarda_variaveis, resultado))
-  {
-    cout << "Ocorreu um erro ao tentar calcular a expressao" << endl;
-    return 1;
-  }
-
-  cout << "Resultado: " << resultado << endl;
-
+  cout << "Fim." << endl;
   return 0;
 }

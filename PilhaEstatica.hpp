@@ -1,5 +1,14 @@
+/*
+ * Trabalho de Estrutura de Dados - Calculadora em notacao polonesa invertida
+ * Integrantes: Guilherme Amelco e Caue
+ *
+ * Pilha estatica: TAD usado para operadores e para valores no calculo da RPN.
+ */
+
 #ifndef PILHA_ESTATICA_HPP
 #define PILHA_ESTATICA_HPP
+
+#include <iostream>
 
 #ifndef TAM
 #define TAM 50
@@ -45,6 +54,13 @@ bool top(const PilhaEstatica<T> &p, T &valor){
     if( Vazia(p) ) return false;
     valor = p.vetor[p.topo];
     return true;
+}
+
+// Percorre a pilha do topo para a base sem alterá-la, só mostrando os elementos.
+template <typename T>
+void mostrar(const PilhaEstatica<T> &p){
+    for( int i = p.topo; i >= 0; i-- )
+        std::cout << p.vetor[i] << " ";
 }
 
 // Não há memória dinâmica a desalocar: basta marcar a pilha como vazia.

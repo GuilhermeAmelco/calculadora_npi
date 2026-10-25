@@ -1,6 +1,14 @@
+/*
+ * Trabalho de Estrutura de Dados - Calculadora em notacao polonesa invertida
+ * Integrantes: Guilherme Amelco e Caue
+ *
+ * Fila dinamica encadeada: TAD usado como entrada e como saida em RPN.
+ */
+
 #ifndef FILA_DINAMICA_HPP
 #define FILA_DINAMICA_HPP
 
+#include <iostream>
 #include <new>
 
 template <typename T>
@@ -71,6 +79,19 @@ bool top(const FilaDinamica<T> &f, T &valor)
         return false;
     valor = f.comeco->info;
     return true;
+}
+
+// Percorre a fila do começo para o fim sem alterá-la, só mostrando os elementos.
+template <typename T>
+void mostrar(const FilaDinamica<T> &f)
+{
+    NoFila<T> *aux = f.comeco;
+
+    while (aux != nullptr)
+    {
+        std::cout << aux->info << " ";
+        aux = aux->eloP;
+    }
 }
 
 template <typename T>
