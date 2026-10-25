@@ -1,9 +1,6 @@
 /*
  * Trabalho de Estrutura de Dados - Calculadora em notacao polonesa invertida
  * Integrantes: Guilherme Amelco e Caue
- *
- * Regras do dominio: classificacao de caracteres, validacao sintatica,
- * conversao infixa -> RPN (Shunting-yard) e avaliacao da RPN.
  */
 
 #ifndef CALCULADORA_HPP
@@ -120,9 +117,6 @@ bool associativo_direita(char c)
   return c == '^';
 }
 
-// Enfileira a expressão preservando a ordem original. Espaços em branco são
-// colapsados em um único ' ' porque separam tokens: sem esse separador "3 5"
-// viraria o número 35 e o erro passaria despercebido.
 template <typename Fila>
 bool inserir_expressao_na_fila(Fila &fila, const string &expressao)
 {

@@ -2,16 +2,11 @@
  * Trabalho de Estrutura de Dados - Calculadora em notacao polonesa invertida
  * Integrantes: Guilherme Amelco e Caue
  *
- * O programa le uma expressao numerica, converte para a notacao polonesa
- * invertida (RPN) usando pilha e fila, pede o valor das variaveis e apresenta
- * o resultado final.
- *
  * Estruturas usadas:
  *   Fila  -> entrada da expressao (ordem de leitura) e saida em RPN
  *   Pilha -> operadores durante a conversao e valores durante o calculo
  *   Lista -> variaveis da expressao e seus valores
  *
- * Compilacao: g++ -std=c++17 -Wall -Wextra -o main.exe main.cpp
  */
 
 #include <iostream>
@@ -32,35 +27,22 @@
 
 using namespace std;
 
-// Troque para 1 para rodar com as estruturas ESTÁTICAS (pilha em vetor e fila
-// circular em vetor) ou deixe 0 para as DINÂMICAS (encadeadas). Também é
-// possível escolher na compilação: g++ -DESTRUTURA_ESTATICA=1 ...
-// A aplicação se comporta da mesma forma nas duas versões: toda a lógica chama
-// as operações (inicializar, queue/push, dequeue/pop, top, Vazia, Cheia,
-// liberar) por funções livres, então só o tipo das variáveis abaixo muda.
 #ifndef ESTRUTURA_ESTATICA
 #define ESTRUTURA_ESTATICA 0
 #endif
 
-// Resolve uma expressão: cria, inicializa, usa e libera as estruturas.
-// As variáveis precisam ficar na main (e não dentro de converter_para_notacao_polonesa)
-// justamente para permitir trocar a estrutura sem tocar na lógica.
-// Retorna false quando a entrada de dados termina (EOF).
 bool calcular_resultado()
 {
-#if ESTRUTURA_ESTATICA
-  FilaEstatica<char> fila_guarda_expressao;             // entrada: expressão caractere por caractere
-  FilaEstatica<string> fila_notacao_polonesa_invertida; // saída: tokens em RPN
-  PilhaEstatica<char> pilha_operadores;                 // operadores e abre-delimitadores
-  PilhaEstatica<double> pilha_valores;                  // operandos já resolvidos
-  Lue<string> lista_guarda_variaveis;                   // nome e valor de cada variável
-#else
+  // FilaEstatica<char> fila_guarda_expressao;
+  // FilaEstatica<string> fila_notacao_polonesa_invertida;
+  // PilhaEstatica<char> pilha_operadores;
+  // PilhaEstatica<double> pilha_valores;
+  // Lue<string> lista_guarda_variaveis;
   FilaDinamica<char> fila_guarda_expressao;             // entrada: expressão caractere por caractere
   FilaDinamica<string> fila_notacao_polonesa_invertida; // saída: tokens em RPN
   PilhaDinamica<char> pilha_operadores;                 // operadores e abre-delimitadores
   PilhaDinamica<double> pilha_valores;                  // operandos já resolvidos
   Lue<string> lista_guarda_variaveis;                   // nome e valor de cada variável
-#endif
 
   inicializar(fila_guarda_expressao);
   inicializar(fila_notacao_polonesa_invertida);
@@ -83,12 +65,8 @@ bool calcular_resultado()
 
 int main()
 {
-#if ESTRUTURA_ESTATICA
-  cout << "Estruturas em uso: ESTATICAS" << endl;
-#else
+  // cout << "Estruturas em uso: ESTATICAS" << endl;
   cout << "Estruturas em uso: DINAMICAS" << endl;
-#endif
-  cout << endl;
 
   while (calcular_resultado())
   {

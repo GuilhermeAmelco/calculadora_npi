@@ -1,8 +1,6 @@
 /*
  * Trabalho de Estrutura de Dados - Calculadora em notacao polonesa invertida
  * Integrantes: Guilherme Amelco e Caue
- *
- * Fila dinamica encadeada: TAD usado como entrada e como saida em RPN.
  */
 
 #ifndef FILA_DINAMICA_HPP

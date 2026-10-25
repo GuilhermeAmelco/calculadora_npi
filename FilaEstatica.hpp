@@ -1,8 +1,6 @@
 /*
  * Trabalho de Estrutura de Dados - Calculadora em notacao polonesa invertida
  * Integrantes: Guilherme Amelco e Caue
- *
- * Fila estatica circular: TAD usado como entrada da expressao.
  */
 
 #ifndef FILA_ESTATICA_HPP
