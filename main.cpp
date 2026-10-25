@@ -27,10 +27,6 @@
 
 using namespace std;
 
-#ifndef ESTRUTURA_ESTATICA
-#define ESTRUTURA_ESTATICA 0
-#endif
-
 bool calcular_resultado()
 {
   // FilaEstatica<char> fila_guarda_expressao;
